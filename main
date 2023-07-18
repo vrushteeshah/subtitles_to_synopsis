@@ -1,0 +1,17 @@
+import sys
+from youtube_transcript_api import YouTubeTranscriptApi
+from transformers import pipeline
+
+video_id = sys.argv[1]
+text = YouTubeTranscriptApi.get_transcript(video_id)
+article = " "
+final_summary = " "
+for i in text
+  article = article + " " + i['text']
+
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+summary = summarizer(article, max_length=180, min_length=70)
+
+final_summary = summary[0]['summary_text']
+
+print(final_summary)
