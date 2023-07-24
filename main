@@ -1,0 +1,38 @@
+import sys
+from youtube_transcript_api import YouTubeTranscriptApi
+from transformers import pipeline
+
+video_id = sys.argv[1]
+transcript = YouTubeTranscriptApi.get_transcript(video_id)
+article = []
+summary = []
+articleIndex = 0
+full_summary = ""
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+
+for i in transcript:
+    if article:
+        if len(article[articleIndex] + " " + i['text']) > 850:
+            articleIndex = articleIndex + 1
+            article.append("")
+
+        article[articleIndex] = article[articleIndex] + " " + i['text']
+    else:
+        article.append("")
+        if len(article[articleIndex] + " " + i['text']) > 850:
+            articleIndex = articleIndex + 1
+        article[articleIndex] = article[articleIndex] + " " + i['text']
+
+for v in article:
+    summarizerOutput = summarizer(v, max_length=30, min_length=10)
+    summary.append(summarizerOutput[0])
+
+for i in summary:
+    full_summary = full_summary + " " + i['summary_text']
+
+print("*******")
+print(full_summary)
+
+# if the summary is too long, summarize the final summary with this (quality may be lost)
+# final_summary = summarizer(full_summary, max_length=100, min_length=40)
+# print(final_summary)
